@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const INITIAL_SECONDS = 25 * 60; // 25 minutes
-
 const ZenModeTimer = ({ task, onComplete, onGiveUp }) => {
-    const [secondsLeft, setSecondsLeft] = useState(INITIAL_SECONDS);
+    const initialSecondsRef = useRef(task?.durationSeconds ?? 25 * 60);
+    const [secondsLeft, setSecondsLeft] = useState(initialSecondsRef.current);
     const [brainDump, setBrainDump] = useState("");
     const intervalRef = useRef(null);
 
@@ -12,7 +11,7 @@ const ZenModeTimer = ({ task, onComplete, onGiveUp }) => {
             setSecondsLeft((s) => {
                 if (s <= 1) {
                     clearInterval(intervalRef.current);
-                    onComplete(INITIAL_SECONDS);
+                    onComplete(initialSecondsRef.current);
                     return 0;
                 }
                 return s - 1;
@@ -114,7 +113,7 @@ const ZenModeTimer = ({ task, onComplete, onGiveUp }) => {
                         <span className="text-[9px] tracking-widest uppercase font-mono">GIVE UP</span>
                     </button>
                     <button
-                        onClick={() => onComplete(INITIAL_SECONDS - secondsLeft)}
+                        onClick={() => onComplete(initialSecondsRef.current - secondsLeft)}
                         className="flex flex-col items-center gap-1 px-10 py-3 border-2 border-vector-blue bg-vector-blue/10 text-vector-blue hover:bg-vector-blue/20 transition-all shadow-[0_0_20px_rgba(125,249,255,0.3)]"
                     >
                         <span className="material-symbols-outlined text-lg">check_circle</span>

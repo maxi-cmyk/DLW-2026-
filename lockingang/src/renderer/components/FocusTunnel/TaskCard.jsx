@@ -1,9 +1,10 @@
 import React from "react";
 
-const TaskCard = ({ task, onStart }) => {
+const TaskCard = ({ task, onStart, onAdd, onDelete }) => {
   if (task.status === "OPEN") {
     return (
       <div
+        onClick={onAdd}
         className="fan-card w-[280px] h-[400px] bg-transparent border-2 border-dashed border-vector-blue/30 flex flex-col items-center justify-center p-5 cursor-pointer group hover:bg-vector-blue/5 hover:border-vector-blue/60 transition-colors"
       >
         <span className="material-symbols-outlined text-vector-blue/30 group-hover:text-vector-blue text-[32px] group-hover:scale-110 transition-transform mb-3">
@@ -35,7 +36,7 @@ const TaskCard = ({ task, onStart }) => {
           <div className="text-lg font-mono text-vector-white terminal-text">
             {task.timeRemaining}
           </div>
-          <button className="text-vector-white/30 hover:text-vector-white transition-colors">
+          <button onClick={onDelete} className="text-vector-white/30 hover:text-vector-white transition-colors">
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
         </div>
@@ -70,7 +71,7 @@ const TaskCard = ({ task, onStart }) => {
         <span className="text-[8px] text-vector-blue/60 uppercase tracking-widest opacity-70">
           {task.id}
         </span>
-        <button className="text-vector-white/30 hover:text-vector-white transition-colors">
+        <button onClick={onDelete} className="text-vector-white/30 hover:text-vector-white transition-colors">
           <span className="material-symbols-outlined text-[16px]">close</span>
         </button>
       </div>
