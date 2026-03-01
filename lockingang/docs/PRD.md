@@ -18,14 +18,13 @@ If knowledge is a vector field (V) where each concept is a point, without active
 
 The application is organized into six primary tabs accessible from a persistent sidebar. Each tab serves a distinct purpose in the student's learning workflow.
 
-| Tab                 | Icon | Purpose                                                                             |
-| ------------------- | ---- | ----------------------------------------------------------------------------------- |
-| Knowledge Tree      | 🌳   | The central hub — visualize, navigate, and interact with your entire learning graph |
-| Dashboard           | 📊   | At-a-glance health metrics, forgetting forecasts, and session briefings             |
-| Focus Tunnel        | 🎯   | Distraction-free task execution with the "Rule of 3" bounded queue                  |
-| Chatbot             | 💬   | Agentic AI assistant for Q&A, scheduling, and graph manipulation                    |
-| Templates           | 📦   | Browse, upload, and import community-shared roadmaps and curricula                  |
-| Calendar & Schedule | 📅   | Unified view of Google Calendar events and auto-scheduled review sessions           |
+| Tab | Purpose |
+| :--- | :--- |
+| Knowledge Tree | The central hub — visualize, navigate, and interact with your entire learning graph |
+| Dashboard | Distraction-free task execution with the "Rule of 3" bounded queue |
+| Chatbot | Agentic AI assistant for Q&A, scheduling, and graph manipulation |
+| Templates | Browse, upload, and import community-shared roadmaps and curricula |
+| Calendar & Schedule | Unified view of Google Calendar events and auto-scheduled review sessions |
 
 ## 3. Tab Specifications
 
@@ -236,3 +235,4 @@ Identifies when a student is structurally stuck and intervenes automatically.
 2.  **Daily Study Session:** Dashboard briefing -> Move top items to Focus Tunnel -> Zen Mode -> Quit. Stray thoughts captured via Brain Dump. Decay clock recalculates next day's blocks.
 3.  **Exam Preparation:** Chatbot proposes a N-day study plan, which is injected into Calendar.
 4.  **Ongoing Adaptation:** AI detects trends and issues, intervening with Bridge nodes or grandparent resets automatically.
+
