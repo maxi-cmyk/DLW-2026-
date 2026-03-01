@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import Sidebar from "../components/Sidebar/Sidebar";
+import MissionBriefingScreen from "./MissionBriefingScreen";
 
 const VectorGraphScreen: React.FC = () => {
+  const [showBriefing, setShowBriefing] = useState(false);
+
   return (
     <div className="bg-[#0D0221] font-mono text-[#7DF9FF]/90 min-h-screen flex overflow-hidden">
       <Sidebar />
@@ -333,6 +336,15 @@ const VectorGraphScreen: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {showBriefing && (
+        <div className="absolute inset-0 z-50 bg-[#0f2223]/80 backdrop-blur-sm overflow-y-auto">
+          <MissionBriefingScreen
+            onClose={() => setShowBriefing(false)}
+            onEngage={() => setShowBriefing(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };
