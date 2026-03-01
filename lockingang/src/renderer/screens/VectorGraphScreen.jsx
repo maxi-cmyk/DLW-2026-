@@ -1,277 +1,492 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
 import MissionBriefingScreen from "./MissionBriefingScreen";
+import { getNodes, subscribe } from "../nodeStore";
+
+const MIN_SCALE = 0.2;
+const MAX_SCALE = 3;
+const ZOOM_SENSITIVITY = 0.001;
 
 const VectorGraphScreen = () => {
   const [showBriefing, setShowBriefing] = useState(false);
-  const navigate = useNavigate();
+  const [nodes, setNodes] = useState(() => getNodes());
+
+  // World-space pixel positions per node id
+  const [positions, setPositions] = useState({});
+
+  // Viewport transform
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [scale, setScale] = useState(1);
+
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [showConnectionBanner, setShowConnectionBanner] = useState(false);
+  const [newNodeLabel, setNewNodeLabel] = useState("");
+  const [nodeSaved, setNodeSaved] = useState(false);
+  const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
+
+  const canvasRef = useRef(null);
+  // Drag state stored in refs to avoid stale closures mid-gesture
+  const interactionRef = useRef(null);
+  // { type: 'node'|'pan', nodeId?, startMouseX, startMouseY, startValX, startValY }
+
+  const location = useLocation();
+
+  // ── Store subscription ───────────────────────────────────────────────────
+  useEffect(() => {
+    return subscribe((updated) => setNodes([...updated]));
+  }, []);
+
+  // ── Initialise world-space positions from % coords in nodeStore ──────────
+  const initPositions = useCallback((nodeList) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const { width, height } = canvas.getBoundingClientRect();
+    setPositions((prev) => {
+      const next = { ...prev };
+      nodeList.forEach((n) => {
+        if (!next[n.id]) {
+          next[n.id] = { x: (n.x / 100) * width, y: (n.y / 100) * height };
+        }
+      });
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    initPositions(nodes);
+    const ro = new ResizeObserver(() => initPositions(nodes));
+    ro.observe(canvas);
+    return () => ro.disconnect();
+  }, [nodes, initPositions]);
+
+  // ── Auto-select & centre new node from Save & Connect ───────────────────
+  useEffect(() => {
+    const state = location.state;
+    if (!state?.newNodeId) return;
+    const node = getNodes().find((n) => n.id === state.newNodeId);
+    if (!node) return;
+    setSelectedNode(node);
+    setNewNodeLabel(node.label);
+    setShowConnectionBanner(true);
+    setTimeout(() => setShowConnectionBanner(false), 5000);
+    // Centre after positions are populated (brief delay)
+    setTimeout(() => centreNode(node.id), 80);
+  }, [location.state]); // eslint-disable-line
+
+  // ── Centre a node in the viewport ────────────────────────────────────────
+  const centreNode = (nodeId) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    setPositions((prev) => {
+      const pos = prev[nodeId];
+      if (!pos) return prev;
+      const { width, height } = canvas.getBoundingClientRect();
+      setScale((s) => {
+        setPan({
+          x: width / 2 - pos.x * s,
+          y: height / 2 - pos.y * s,
+        });
+        return s;
+      });
+      return prev;
+    });
+  };
+
+  // ── Canvas-space → world-space helper ────────────────────────────────────
+  // (not needed directly, but useful for clarity)
+
+  // ── Pointer events ────────────────────────────────────────────────────────
+  const handleNodePointerDown = (e, node) => {
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    interactionRef.current = {
+      type: "node",
+      nodeId: node.id,
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startNodeX: positions[node.id]?.x ?? 0,
+      startNodeY: positions[node.id]?.y ?? 0,
+      moved: false,
+    };
+  };
+
+  const handleCanvasPointerDown = (e) => {
+    if (e.target !== canvasRef.current && !e.target.closest(".graph-layer")) return;
+    interactionRef.current = {
+      type: "pan",
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startPanX: pan.x,
+      startPanY: pan.y,
+      moved: false,
+    };
+  };
+
+  const handlePointerMove = (e) => {
+    const ia = interactionRef.current;
+    if (!ia) return;
+    const dx = e.clientX - ia.startMouseX;
+    const dy = e.clientY - ia.startMouseY;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) ia.moved = true;
+
+    if (ia.type === "node") {
+      // Divide by scale to convert screen delta → world delta
+      setPositions((prev) => ({
+        ...prev,
+        [ia.nodeId]: {
+          x: ia.startNodeX + dx / scale,
+          y: ia.startNodeY + dy / scale,
+        },
+      }));
+    } else if (ia.type === "pan") {
+      setPan({ x: ia.startPanX + dx, y: ia.startPanY + dy });
+    }
+  };
+
+  const handlePointerUp = (e) => {
+    const ia = interactionRef.current;
+    interactionRef.current = null;
+    if (!ia) return;
+
+    // Fire click only if pointer barely moved (not a drag)
+    if (ia.type === "node" && !ia.moved) {
+      const node = nodes.find((n) => n.id === ia.nodeId);
+      if (node) {
+        setSelectedNode(node);
+        setNodeSaved(false);
+        centreNode(ia.nodeId);
+      }
+    }
+  };
+
+  // ── Wheel zoom toward cursor ──────────────────────────────────────────────
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left; // cursor in canvas space
+    const cy = e.clientY - rect.top;
+
+    const delta = -e.deltaY * ZOOM_SENSITIVITY;
+    const factor = Math.exp(delta * 2.5);
+
+    setScale((prevScale) => {
+      const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prevScale * factor));
+      const ratio = newScale / prevScale;
+      setPan((prevPan) => ({
+        x: cx - (cx - prevPan.x) * ratio,
+        y: cy - (cy - prevPan.y) * ratio,
+      }));
+      return newScale;
+    });
+  };
+
+  // Attach wheel with passive:false so we can preventDefault
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.addEventListener("wheel", handleWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", handleWheel);
+  }); // re-attach each render so pan/scale are fresh
+
+  const closeInspector = () => setSelectedNode(null);
+
+  // ── Edge list ─────────────────────────────────────────────────────────────
+  const edges = [];
+  nodes.forEach((node) => {
+    (node.connectedTo || []).forEach((targetId) => {
+      const target = nodes.find((n) => n.id === targetId);
+      if (target && positions[node.id] && positions[target.id]) {
+        edges.push({ from: node, to: target });
+      }
+    });
+  });
 
   return (
     <div className="h-screen flex overflow-hidden bg-vector-bg text-vector-white font-terminal relative">
-      <div className="scanline"></div>
-
+      <div className="scanline" />
       <Sidebar />
 
-      {/* Directory Explorer Panel */}
-      <aside className="w-60 border-r border-vector-blue/20 flex flex-col z-40 bg-vector-bg/50 backdrop-blur-sm shrink-0">
-        <div className="h-14 border-b border-vector-blue/20 flex items-center px-4">
-          <h3 className="text-[9px] font-bold tracking-widest uppercase text-vector-blue">
-            DIRECTORY_EXPLORER
-          </h3>
-        </div>
-        <div className="p-3 border-b border-vector-blue/20">
-          <button className="w-full border border-vector-blue/30 hover:border-vector-blue bg-vector-blue/5 hover:bg-vector-blue/10 text-[9px] tracking-widest uppercase py-2 px-3 text-vector-blue transition-all flex items-center justify-center gap-2">
-            <span className="material-symbols-outlined text-sm">
-              create_new_folder
-            </span>
-            NEW_FOLDER
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-2">
-          <div className="flex items-center gap-2 py-1.5 px-2 hover:bg-vector-blue/10 cursor-pointer text-[9px] text-vector-white/70 hover:text-vector-blue transition-colors border-l border-vector-blue/10 hover:border-vector-blue/50 ml-2">
-            <span className="material-symbols-outlined text-sm">folder_open</span>
-            <span>ROOT</span>
-          </div>
-
-          <div className="pl-4 border-l border-vector-blue/10 ml-2 mt-1">
-            <div className="flex items-center gap-2 py-1.5 px-2 hover:bg-vector-blue/10 cursor-pointer text-[9px] text-vector-white/70 hover:text-vector-blue transition-colors border-l border-vector-blue/10 hover:border-vector-blue/50 ml-2">
-              <span className="material-symbols-outlined text-sm">folder</span>
-              <span>PHYSICS_101</span>
-            </div>
-
-            <div className="flex items-center gap-2 py-1.5 px-2 hover:bg-vector-blue/10 cursor-pointer text-[9px] text-vector-white/70 hover:text-vector-blue transition-colors border-l border-vector-blue/10 hover:border-vector-blue/50 ml-2">
-              <span className="material-symbols-outlined text-sm">folder_open</span>
-              <span>BIOLOGY_ROOT</span>
-            </div>
-
-            <div className="pl-4 border-l border-vector-blue/10 ml-2 mt-1">
-              <div className="flex items-center gap-2 py-1.5 px-2 cursor-pointer text-[9px] ml-2 text-vector-blue bg-vector-blue/10 border-l border-vector-blue/50 font-bold">
-                <span className="material-symbols-outlined text-sm">folder_open</span>
-                <span>CELL_STRUCTURE</span>
-              </div>
-
-              <div className="pl-4 border-l border-vector-blue/10 ml-2 mt-1">
-                <div className="flex items-center gap-2 py-1.5 px-2 hover:bg-vector-blue/10 cursor-pointer text-[9px] text-vector-white/50 hover:text-vector-blue transition-colors border-l border-vector-blue/10 hover:border-vector-blue/50 ml-2">
-                  <span className="material-symbols-outlined text-sm">description</span>
-                  <span>mitochondria.vec</span>
-                </div>
-                <div className="flex items-center gap-2 py-1.5 px-2 hover:bg-vector-blue/10 cursor-pointer text-[9px] text-vector-white/50 hover:text-vector-blue transition-colors border-l border-vector-blue/10 hover:border-vector-blue/50 ml-2">
-                  <span className="material-symbols-outlined text-sm">description</span>
-                  <span>nucleus_data.json</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 py-1.5 px-2 hover:bg-vector-blue/10 cursor-pointer text-[9px] text-vector-white/70 hover:text-vector-blue transition-colors border-l border-vector-blue/10 hover:border-vector-blue/50 ml-2">
-                <span className="material-symbols-outlined text-sm">folder</span>
-                <span>GENETICS</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 py-1.5 px-2 hover:bg-vector-blue/10 cursor-pointer text-[9px] text-vector-white/70 hover:text-vector-blue transition-colors border-l border-vector-blue/10 hover:border-vector-blue/50 ml-2">
-              <span className="material-symbols-outlined text-sm">folder</span>
-              <span>HISTORY_ARCHIVE</span>
-            </div>
-
-            <div className="flex items-center gap-2 py-1.5 px-2 hover:bg-vector-blue/10 cursor-pointer text-[9px] text-vector-white/70 hover:text-vector-blue transition-colors border-l border-vector-blue/10 hover:border-vector-blue/50 ml-2">
-              <span className="material-symbols-outlined text-sm">folder</span>
-              <span>CALCULUS_II</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 py-1.5 px-2 hover:bg-vector-blue/10 cursor-pointer text-[9px] text-vector-white/70 hover:text-vector-blue transition-colors border-l border-vector-blue/10 hover:border-vector-blue/50 ml-2 mt-2 pt-2 border-t border-vector-blue/10">
-            <span className="material-symbols-outlined text-sm">cloud</span>
-            <span>CLOUD_BACKUP</span>
-          </div>
-        </div>
-
-        <div className="p-3 border-t border-vector-blue/20 text-[8px] tracking-widest uppercase text-vector-blue/40 text-center">
-          4 DIRS / 12 FILES
-        </div>
-      </aside>
-
-      {/* Main Content */}
       <div className="flex-1 flex flex-col relative overflow-hidden">
-        <header className="h-14 border-b border-vector-blue flex items-center justify-between px-6 backdrop-blur-md bg-vector-bg/40 z-10">
+        {/* Header */}
+        <header className="h-14 border-b border-vector-blue flex items-center justify-between px-6 backdrop-blur-md bg-vector-bg/40 z-10 shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-vector-white/60 font-mono tracking-wider">
-              KNOWLEDGE_BASE
-            </span>
+            <span className="text-[10px] text-vector-white/60 font-mono tracking-wider">KNOWLEDGE_BASE</span>
             <span className="text-[10px] text-vector-blue font-bold">&gt;&gt;</span>
-            <span className="text-[10px] text-vector-white/60 font-mono tracking-wider">BIOLOGY_ROOT</span>
-            <span className="text-[10px] text-vector-blue font-bold">&gt;&gt;</span>
-            <span className="text-[10px] text-vector-blue font-mono tracking-wider terminal-text">CELL_STRUCTURE</span>
-          </div>
-          <div className="relative w-72">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center">
-              <span className="material-symbols-outlined text-vector-blue/50 text-[18px]">adjust</span>
-            </div>
-            <input
-              className="w-full bg-vector-bg border border-vector-blue/30 px-10 py-1.5 text-[9px] tracking-widest uppercase focus:border-vector-blue focus:ring-1 focus:ring-vector-blue placeholder:text-vector-blue/30 text-vector-blue transition-all font-mono"
-              placeholder="SCAN COORDINATES..."
-              type="text"
-            />
+            <span className="text-[10px] text-vector-blue font-mono tracking-wider terminal-text">VECTOR_GRAPH</span>
           </div>
         </header>
 
-        {/* Grid background */}
+        {/* Grid background (NOT transformed — it tiles across the full viewport) */}
         <div
-          className="absolute inset-0 z-0 opacity-40 pointer-events-none"
+          className="absolute inset-0 z-0 pointer-events-none"
           style={{
-            backgroundSize: "32px 32px",
+            backgroundSize: `${32 * scale}px ${32 * scale}px`,
+            backgroundPosition: `${pan.x % (32 * scale)}px ${pan.y % (32 * scale)}px`,
             backgroundImage:
-              "linear-gradient(to right, rgba(125, 249, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(125, 249, 255, 0.05) 1px, transparent 1px)",
+              "linear-gradient(to right, rgba(125,249,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(125,249,255,0.04) 1px, transparent 1px)",
           }}
-        ></div>
+        />
 
         <main className="flex-1 relative flex flex-col overflow-hidden">
-          <div className="flex-1 relative">
-            {/* Stats */}
-            <div className="absolute top-6 left-8 z-20 space-y-1 text-[9px] tracking-widest uppercase text-vector-blue/60">
-              <div className="text-vector-blue/90">NODES: 12</div>
-              <div>LINKS: 34</div>
-              <div>ZOOM: 100%</div>
-              <div>
-                ENCRYPTED_LINK: <span className="text-vector-blue">ACTIVE</span>
-              </div>
+          {/* ── Canvas (receives pan/zoom events) ── */}
+          <div
+            ref={canvasRef}
+            className="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing select-none"
+            onPointerDown={handleCanvasPointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+          >
+            {/* Fixed HUD — stays in place while graph pans */}
+            <div className="absolute top-6 left-8 z-20 space-y-1 text-[9px] tracking-widest uppercase text-vector-blue/60 pointer-events-none">
+              <div className="text-vector-blue/90">NODES: {nodes.length}</div>
+              <div>LINKS: {edges.length}</div>
+              <div>ZOOM: {Math.round(scale * 100)}%</div>
+              <div>ENCRYPTED_LINK: <span className="text-vector-blue">ACTIVE</span></div>
             </div>
 
-            {/* Connection notification */}
-            <div className="absolute top-6 right-8 w-80 z-20">
-              <div className="bg-vector-bg/90 border border-vector-blue p-4 shadow-card-glow backdrop-blur-md relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-vector-blue"></div>
-                <div className="flex items-start gap-3 mb-2">
-                  <div className="p-1 bg-vector-blue/20 border border-vector-blue/50 text-vector-blue">
-                    <span className="material-symbols-outlined text-[18px]">link</span>
+            {/* Connection banner */}
+            {showConnectionBanner && (
+              <div className="absolute top-6 right-8 w-80 z-30">
+                <div className="bg-vector-bg/90 border border-vector-blue p-4 shadow-card-glow backdrop-blur-md relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-vector-blue" />
+                  <div className="flex items-start gap-3 mb-2">
+                    <div className="p-1 bg-vector-blue/20 border border-vector-blue/50 text-vector-blue">
+                      <span className="material-symbols-outlined text-[18px]">link</span>
+                    </div>
+                    <div>
+                      <h3 className="text-vector-blue font-bold text-[9px] tracking-widest uppercase">CONNECTION_ESTABLISHED</h3>
+                      <p className="text-vector-white/70 text-[9px] mt-1 leading-relaxed font-mono">
+                        Node <span className="text-vector-white">[{newNodeLabel}]</span> added to Knowledge Graph.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-vector-blue font-bold text-[9px] tracking-widest uppercase">
-                      CONNECTION_ESTABLISHED
-                    </h3>
-                    <p className="text-vector-white/70 text-[9px] mt-1 leading-relaxed font-mono">
-                      Successfully linked node{" "}
-                      <span className="text-vector-white">[yeehaw]</span> to Knowledge
-                      Graph via{" "}
-                      <span className="text-vector-white">[ME (Core Memory)]</span>.
-                    </p>
+                  <div className="mt-2 flex justify-end">
+                    <button
+                      onClick={() => setShowConnectionBanner(false)}
+                      className="text-[9px] tracking-widest uppercase text-vector-blue hover:text-vector-white transition-colors flex items-center gap-1"
+                    >
+                      DISMISS <span className="material-symbols-outlined text-[12px]">close</span>
+                    </button>
                   </div>
-                </div>
-                <div className="mt-2 flex justify-end">
-                  <button className="text-[9px] tracking-widest uppercase text-vector-blue hover:text-vector-white transition-colors flex items-center gap-1">
-                    DISMISS{" "}
-                    <span className="material-symbols-outlined text-[12px]">close</span>
-                  </button>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Graph SVG + nodes */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+            {/* NODE_INSPECTOR */}
+            {selectedNode && !showConnectionBanner && (
+              <div className="absolute top-6 right-8 w-72 z-30 border border-vector-blue bg-vector-bg/95 backdrop-blur-md shadow-card-glow">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-vector-blue/30">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-vector-blue text-sm">settings</span>
+                    <span className="text-[9px] text-vector-blue tracking-widest uppercase font-bold">NODE_INSPECTOR</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setInspectorCollapsed((c) => !c)}
+                      className="text-vector-white/30 hover:text-vector-blue transition-colors"
+                      title={inspectorCollapsed ? "Expand" : "Collapse"}
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        {inspectorCollapsed ? "add" : "remove"}
+                      </span>
+                    </button>
+                    <button onClick={closeInspector} className="text-vector-white/30 hover:text-vector-white transition-colors">
+                      <span className="material-symbols-outlined text-sm">close</span>
+                    </button>
+                  </div>
+                </div>
+                {!inspectorCollapsed && (
+                  <div className="p-4 flex flex-col gap-4">
+                    <div>
+                      <p className="text-[7px] text-vector-blue/40 font-mono tracking-widest uppercase mb-2">
+                        DATA_PAYLOAD // {selectedNode.id.toUpperCase()}
+                      </p>
+                      <textarea
+                        key={selectedNode.id}
+                        defaultValue={selectedNode.data || selectedNode.label}
+                        rows={4}
+                        className="w-full bg-black/60 border border-vector-blue/20 p-3 text-vector-white/70 text-[10px] font-mono leading-relaxed resize-none outline-none focus:border-vector-blue/60 transition-colors"
+                      />
+                    </div>
+                    <button
+                      onClick={() => {
+                        setNodeSaved(true);
+                        setTimeout(() => setNodeSaved(false), 2000);
+                      }}
+                      className={`w-full flex items-center justify-center gap-2 py-2.5 border transition-all text-[10px] tracking-widest uppercase font-mono
+                        ${nodeSaved
+                          ? "border-green-500/60 bg-green-500/10 text-green-400"
+                          : "border-vector-blue/40 bg-vector-blue/5 hover:bg-vector-blue/20 text-vector-blue"}`}
+                    >
+                      <span className="material-symbols-outlined text-sm">{nodeSaved ? "check_circle" : "save"}</span>
+                      {nodeSaved ? "SAVED" : "SAVE"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+
+            {/* ── Graph layer — single transform for pan + scale ── */}
+            <div
+              className="graph-layer absolute inset-0"
+              style={{
+                transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+                transformOrigin: "0 0",
+                // No CSS transition — JS drives this for instant pan; centreNode uses setScale/setPan directly
+              }}
+            >
+              {/* SVG edges */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none"
+                style={{ overflow: "visible" }}>
                 <defs>
-                  <linearGradient id="glowGrad" x1="0%" x2="100%" y1="0%" y2="100%">
-                    <stop offset="0%" style={{ stopColor: "rgba(125, 249, 255, 0)" }}></stop>
-                    <stop offset="50%" style={{ stopColor: "rgba(125, 249, 255, 1)" }}></stop>
-                    <stop offset="100%" style={{ stopColor: "rgba(125, 249, 255, 0)" }}></stop>
-                  </linearGradient>
                   <filter id="vectorGlow">
-                    <feGaussianBlur result="blur" stdDeviation="3"></feGaussianBlur>
+                    <feGaussianBlur result="blur" stdDeviation="2.5" />
                     <feMerge>
-                      <feMergeNode in="blur"></feMergeNode>
-                      <feMergeNode in="SourceGraphic"></feMergeNode>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
                 </defs>
-                <line filter="url(#vectorGlow)" stroke="url(#glowGrad)" strokeWidth="2" x1="50%" x2="70%" y1="50%" y2="30%"></line>
-                <line opacity="0.3" stroke="#7DF9FF" strokeDasharray="4" strokeWidth="1" x1="50%" x2="30%" y1="50%" y2="40%"></line>
-                <line opacity="0.3" stroke="#7DF9FF" strokeDasharray="4" strokeWidth="1" x1="70%" x2="80%" y1="30%" y2="50%"></line>
+                {edges.map(({ from, to }, i) => {
+                  const fx = positions[from.id]?.x ?? 0;
+                  const fy = positions[from.id]?.y ?? 0;
+                  const tx = positions[to.id]?.x ?? 0;
+                  const ty = positions[to.id]?.y ?? 0;
+                  const isPrimary = from.isPrimary || to.isPrimary;
+                  return (
+                    <line
+                      key={i}
+                      x1={fx} y1={fy} x2={tx} y2={ty}
+                      stroke="#7DF9FF"
+                      strokeWidth={isPrimary ? 2 / scale : 1 / scale}
+                      strokeDasharray={isPrimary ? "0" : `${5 / scale} ${3 / scale}`}
+                      opacity={isPrimary ? 0.8 : 0.35}
+                      filter={isPrimary ? "url(#vectorGlow)" : "none"}
+                    />
+                  );
+                })}
               </svg>
 
-              {/* Primary node — click to quiz */}
-              <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center cursor-pointer hover:scale-110 transition-transform"
-                onClick={() => navigate("/quiz")}
-              >
-                <div className="relative">
-                  <div className="size-14 bg-vector-bg border-2 border-vector-blue shadow-card-glow flex items-center justify-center z-10">
-                    <span className="material-symbols-outlined text-vector-blue text-2xl">check_circle</span>
+              {/* Nodes */}
+              {nodes.map((node) => {
+                const pos = positions[node.id];
+                if (!pos) return null;
+                const isSelected = selectedNode?.id === node.id;
+                const sizePx = node.isPrimary ? 56 : 40;
+                const borderW = node.isPrimary ? "2px" : "1px";
+
+                return (
+                  <div
+                    key={node.id}
+                    className="absolute flex flex-col items-center"
+                    style={{
+                      left: pos.x,
+                      top: pos.y,
+                      transform: "translate(-50%, -50%)",
+                      cursor: "grab",
+                    }}
+                    onPointerDown={(e) => handleNodePointerDown(e, node)}
+                  >
+                    <div className="relative">
+                      <div
+                        style={{
+                          width: sizePx,
+                          height: sizePx,
+                          borderWidth: borderW,
+                          borderStyle: "solid",
+                          borderColor: isSelected ? "#7DF9FF" : "rgba(125,249,255,0.5)",
+                          boxShadow: isSelected
+                            ? "0 0 24px rgba(125,249,255,0.7)"
+                            : "none",
+                        }}
+                        className="flex items-center justify-center bg-vector-bg transition-all duration-150"
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          style={{
+                            fontSize: node.isPrimary ? "1.5rem" : "1.25rem",
+                            color: isSelected ? "#7DF9FF" : "rgba(125,249,255,0.6)",
+                          }}
+                        >
+                          {node.icon}
+                        </span>
+                      </div>
+                      {isSelected && (
+                        <div
+                          className="absolute inset-0 border border-vector-blue animate-ping opacity-40 pointer-events-none"
+                        />
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 8,
+                        padding: "2px 8px",
+                        border: `1px solid ${isSelected ? "#7DF9FF" : "rgba(125,249,255,0.3)"}`,
+                        color: isSelected ? "#7DF9FF" : "rgba(125,249,255,0.5)",
+                        fontSize: "8px",
+                        letterSpacing: "0.15em",
+                        textTransform: "uppercase",
+                        fontFamily: "monospace",
+                        whiteSpace: "nowrap",
+                        background: "rgba(8,2,20,0.85)",
+                      }}
+                    >
+                      {node.label}
+                    </div>
                   </div>
-                  <div className="absolute inset-0 border border-vector-blue animate-ping opacity-50"></div>
-                </div>
-                <div className="mt-4 bg-vector-bg/90 px-3 py-1 border border-vector-blue/50 text-vector-blue text-[9px] tracking-widest uppercase shadow-card-glow">
-                  [yeehaw]
-                </div>
-              </div>
+                );
+              })}
+            </div> {/* graph layer */}
 
-              {/* Secondary node */}
-              <div
-                className="absolute top-[30%] left-[70%] -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center opacity-80 cursor-pointer hover:opacity-100 hover:scale-110 transition-transform"
-                onClick={() => navigate("/quiz")}
-              >
-                <div className="size-10 bg-vector-bg border border-vector-blue/40 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-vector-blue/60 text-xl">neurology</span>
-                </div>
-                <div className="mt-2 text-vector-blue/60 text-[8px] tracking-widest uppercase">
-                  ME (CORE MEMORY)
-                </div>
-              </div>
-
-              {/* XP float */}
-              <div
-                className="absolute top-[42%] left-[58%] -translate-y-12 z-20 animate-bounce cursor-pointer"
-                onClick={() => navigate("/quiz")}
-              >
-                <div
-                  className="text-vector-white text-2xl tracking-widest uppercase font-mono"
-                  style={{ textShadow: "0 0 10px rgba(125, 249, 255, 0.6)" }}
-                >
-                  +100 XP
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom toolbar */}
-          <div className="px-8 pb-8 flex items-center justify-between z-30">
-            <div className="flex items-center gap-4">
-              <button className="border border-vector-blue/50 bg-vector-blue/5 px-6 py-2 flex items-center gap-2 hover:bg-vector-blue/20 transition-all text-vector-white">
+            {/* Bottom-left floating controls */}
+            <div className="absolute bottom-6 left-6 z-20 flex items-center gap-4 pointer-events-auto">
+              <button className="border border-vector-blue/50 bg-vector-blue/5 px-6 py-2 flex items-center gap-2 hover:bg-vector-blue/20 transition-all text-vector-white text-[9px] tracking-widest uppercase">
                 <span className="material-symbols-outlined text-[18px]">magic_button</span>
-                <span className="tracking-widest uppercase text-[9px]">AUTO_SORT</span>
+                AUTO_SORT
               </button>
-              <button className="border border-vector-blue bg-vector-blue/10 px-6 py-2 flex items-center gap-2 hover:bg-vector-blue/30 transition-all text-vector-white">
+              <button className="border border-vector-blue bg-vector-blue/10 px-6 py-2 flex items-center gap-2 hover:bg-vector-blue/30 transition-all text-vector-white text-[9px] tracking-widest uppercase">
                 <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                <span className="tracking-widest uppercase text-[9px]">ADD_EDGE</span>
+                ADD_EDGE
               </button>
-              <button className="border border-red-500/50 bg-red-500/5 px-6 py-2 flex items-center gap-2 text-red-400 hover:bg-red-500/20 transition-all">
+              <button className="border border-red-500/50 bg-red-500/5 px-6 py-2 flex items-center gap-2 text-red-400 hover:bg-red-500/20 transition-all text-[9px] tracking-widest uppercase">
                 <span className="material-symbols-outlined text-[18px]">delete</span>
-                <span className="tracking-widest uppercase text-[9px]">DEL_EDGE</span>
+                DEL_EDGE
               </button>
             </div>
 
-            <div className="flex items-center gap-4">
-              <button className="border border-vector-blue/50 bg-vector-blue/5 px-6 py-2 flex items-center gap-2 hover:bg-vector-blue/20 transition-all text-vector-white">
-                <span className="material-symbols-outlined text-[18px]">filter_center_focus</span>
-                <span className="tracking-widest uppercase text-[9px]">RECENTER</span>
-              </button>
+            {/* Bottom-right floating controls */}
+            <div className="absolute bottom-6 right-6 z-20 pointer-events-auto">
               <div className="flex flex-col border border-vector-blue/30 divide-y divide-vector-blue/30">
-                <button className="p-1 hover:bg-vector-blue/10 text-vector-blue/70 hover:text-vector-blue transition-colors">
+                <button
+                  onClick={() => { setPan({ x: 0, y: 0 }); setScale(1); }}
+                  className="p-1 hover:bg-vector-blue/10 text-vector-blue/70 hover:text-vector-blue transition-colors"
+                  title="Recenter"
+                >
+                  <span className="material-symbols-outlined text-[20px]">filter_center_focus</span>
+                </button>
+                <button
+                  onClick={() => setScale((s) => Math.min(MAX_SCALE, s * 1.25))}
+                  className="p-1 hover:bg-vector-blue/10 text-vector-blue/70 hover:text-vector-blue transition-colors"
+                >
                   <span className="material-symbols-outlined text-[20px]">add</span>
                 </button>
-                <button className="p-1 hover:bg-vector-blue/10 text-vector-blue/70 hover:text-vector-blue transition-colors">
+                <button
+                  onClick={() => setScale((s) => Math.max(MIN_SCALE, s / 1.25))}
+                  className="p-1 hover:bg-vector-blue/10 text-vector-blue/70 hover:text-vector-blue transition-colors"
+                >
                   <span className="material-symbols-outlined text-[20px]">remove</span>
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* Footer status */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] tracking-widest uppercase opacity-30 flex gap-8 whitespace-nowrap text-vector-blue">
-            <span>UGTAFOCUSMAN_V2.0.4.BUILD</span>
-            <span>MEMORY_USAGE: 42% // CPU: STABLE</span>
-          </div>
+          </div> {/* canvas */}
         </main>
-      </div>
+      </div> {/* outer column */}
 
       {showBriefing && (
         <div className="absolute inset-0 z-50 bg-vector-bg/80 backdrop-blur-sm overflow-y-auto">
@@ -284,5 +499,6 @@ const VectorGraphScreen = () => {
     </div>
   );
 };
+
 
 export default VectorGraphScreen;

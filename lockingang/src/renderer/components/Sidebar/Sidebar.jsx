@@ -32,22 +32,6 @@ const Sidebar = () => {
 
         <nav className="flex flex-col gap-1 p-3 mt-2">
           <NavLink
-            to="/knowledge-tree"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
-                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
-                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[18px]">
-              account_tree
-            </span>
-            <span className="text-[9px] tracking-widest uppercase">
-              Knowledge Tree
-            </span>
-          </NavLink>
-          <NavLink
             to="/"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
@@ -67,7 +51,7 @@ const Sidebar = () => {
             </span>
           </NavLink>
           <NavLink
-            to="/focus-tunnel"
+            to="/knowledge-tree"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
                 ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
@@ -76,10 +60,10 @@ const Sidebar = () => {
             }
           >
             <span className="material-symbols-outlined text-[18px]">
-              rocket_launch
+              account_tree
             </span>
             <span className="text-[9px] tracking-widest uppercase">
-              Focus Tunnel
+              Knowledge Tree
             </span>
           </NavLink>
           <NavLink
@@ -94,22 +78,6 @@ const Sidebar = () => {
             <span className="material-symbols-outlined text-[18px]">chat</span>
             <span className="text-[9px] tracking-widest uppercase">
               Chatbot
-            </span>
-          </NavLink>
-          <NavLink
-            to="/templates"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
-                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
-                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[18px]">
-              inventory_2
-            </span>
-            <span className="text-[9px] tracking-widest uppercase">
-              Templates
             </span>
           </NavLink>
           <NavLink
@@ -129,36 +97,6 @@ const Sidebar = () => {
             </span>
           </NavLink>
         </nav>
-      </div>
-
-      <div>
-        <div className="px-5 pb-5">
-          <div className="p-3 border border-vector-blue/40 space-y-3 bg-vector-blue/5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[8px] text-vector-blue/60 mb-1 tracking-widest">
-                  SESSION_UPTIME
-                </p>
-                <span className="text-sm terminal-text text-vector-white font-mono">
-                  04:20:59
-                </span>
-              </div>
-              <span className="material-symbols-outlined text-vector-blue text-[16px] animate-pulse">
-                timer
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 border-t border-vector-blue/30 flex justify-between items-center">
-          <span className="text-[8px] text-vector-white/40">
-            v3.0.0-hackathon
-          </span>
-          <div className="flex gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-[8px] text-vector-blue">ONLINE</span>
-          </div>
-        </div>
       </div>
     </aside>
   );

@@ -1,7 +1,7 @@
 import React from "react";
 import TaskCard from "./TaskCard";
 
-const FocusTunnel = () => {
+const FocusTunnel = ({ onStart }) => {
   const tasks = [
     {
       id: "PROCESS_02",
@@ -9,8 +9,6 @@ const FocusTunnel = () => {
       description: "Diagram synthesis & phase ID.",
       status: "ACTIVE",
       duration: "1h 30m",
-      transform: "rotate(-10deg) translateX(-40px) translateY(20px)",
-      zIndex: 5,
     },
     {
       id: "PROCESS_01",
@@ -18,21 +16,19 @@ const FocusTunnel = () => {
       description: "Re-evaluating framework based on Q3 review notes.",
       status: "EXECUTING",
       timeRemaining: "24:12",
-      transform: "rotate(0deg) translateY(-20px)",
-      zIndex: 20,
     },
     {
-      id: "OPEN_SLOT",
-      title: "Add_Task",
-      description: "OPEN_SLOT",
-      status: "OPEN",
-      transform: "rotate(10deg) translateX(40px) translateY(20px)",
-      zIndex: 5,
+      id: "PROCESS_03",
+      title: "Physics Problem Set 7",
+      description: "Wave optics & interference patterns. Due tomorrow.",
+      status: "ACTIVE",
+      duration: "45m",
     },
   ];
 
   return (
-    <div className="flex-[3] relative flex flex-col border-r border-vector-blue/20 bg-vector-bg/20">
+    <div className="flex-[3] relative flex flex-col bg-vector-bg/20 overflow-hidden">
+      {/* Header */}
       <div className="absolute top-6 left-6 z-10">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-vector-blue text-[20px]">
@@ -47,16 +43,11 @@ const FocusTunnel = () => {
         </p>
       </div>
 
-      <div className="flex-1 relative card-fan-container">
+      {/* Cards — evenly spread across the full width */}
+      <div className="flex-1 flex items-center justify-evenly gap-6 px-8 pt-16">
         {tasks.map((task, index) => (
-          <TaskCard key={index} task={task} />
+          <TaskCard key={index} task={task} onStart={onStart} />
         ))}
-      </div>
-
-      <div className="absolute bottom-6 w-full text-center z-0 pointer-events-none">
-        <p className="text-[8px] text-vector-blue/30 font-mono uppercase tracking-widest">
-          /// RULE_OF_3: CONSTRAINED_WORKFLOW ///
-        </p>
       </div>
     </div>
   );
