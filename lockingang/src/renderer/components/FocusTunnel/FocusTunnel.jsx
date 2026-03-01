@@ -1,8 +1,8 @@
 import React from "react";
-import TaskCard, { TaskData } from "./TaskCard";
+import TaskCard from "./TaskCard";
 
-const FocusTunnel: React.FC = () => {
-  const tasks: TaskData[] = [
+const FocusTunnel = () => {
+  const tasks = [
     {
       id: "PROCESS_02",
       title: "Biology Ch.4: Mitosis",

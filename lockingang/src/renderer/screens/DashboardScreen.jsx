@@ -4,7 +4,7 @@ import Header from "../components/Header/Header";
 import FocusTunnel from "../components/FocusTunnel/FocusTunnel";
 import Backlog from "../components/Backlog/Backlog";
 
-const DashboardScreen: React.FC = () => {
+const DashboardScreen = () => {
   return (
     <div className="h-screen flex overflow-hidden bg-vector-bg text-vector-white font-terminal relative">
       <div className="scanline"></div>

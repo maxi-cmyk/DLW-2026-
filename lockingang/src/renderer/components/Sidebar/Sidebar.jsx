@@ -1,6 +1,7 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 
-const Sidebar: React.FC = () => {
+const Sidebar = () => {
   return (
     <aside className="w-64 flex-shrink-0 border-r border-vector-blue flex flex-col justify-between h-full bg-vector-bg/80 backdrop-blur-sm z-20">
       <div>
@@ -30,9 +31,14 @@ const Sidebar: React.FC = () => {
         </div>
 
         <nav className="flex flex-col gap-1 p-3 mt-2">
-          <a
-            className="flex items-center gap-3 px-3 py-3 border border-transparent text-vector-white/60 hover:text-vector-blue hover:border-vector-blue/30 transition-all group"
-            href="#"
+          <NavLink
+            to="/knowledge-tree"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
+                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
+                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
+              }`
+            }
           >
             <span className="material-symbols-outlined text-[18px]">
               account_tree
@@ -40,21 +46,34 @@ const Sidebar: React.FC = () => {
             <span className="text-[9px] tracking-widest uppercase">
               Knowledge Tree
             </span>
-          </a>
-          <a
-            className="flex items-center gap-3 px-3 py-3 border border-vector-blue bg-vector-blue/10 text-vector-white transition-all group"
-            href="#"
+          </NavLink>
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
+                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
+                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
+              }`
+            }
           >
-            <span className="material-symbols-outlined text-[18px] text-vector-blue">
+            <span
+              className={`material-symbols-outlined text-[18px] ${location.pathname === "/" ? "text-[#7DF9FF]" : ""
+                }`}
+            >
               dashboard
             </span>
             <span className="text-[9px] tracking-widest uppercase">
               Dashboard
             </span>
-          </a>
-          <a
-            className="flex items-center gap-3 px-3 py-3 border border-transparent text-vector-white/60 hover:text-vector-blue hover:border-vector-blue/30 transition-all group"
-            href="#"
+          </NavLink>
+          <NavLink
+            to="/focus-tunnel"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
+                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
+                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
+              }`
+            }
           >
             <span className="material-symbols-outlined text-[18px]">
               rocket_launch
@@ -62,19 +81,29 @@ const Sidebar: React.FC = () => {
             <span className="text-[9px] tracking-widest uppercase">
               Focus Tunnel
             </span>
-          </a>
-          <a
-            className="flex items-center gap-3 px-3 py-3 border border-transparent text-vector-white/60 hover:text-vector-blue hover:border-vector-blue/30 transition-all group"
-            href="#"
+          </NavLink>
+          <NavLink
+            to="/chatbot"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
+                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
+                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
+              }`
+            }
           >
             <span className="material-symbols-outlined text-[18px]">chat</span>
             <span className="text-[9px] tracking-widest uppercase">
               Chatbot
             </span>
-          </a>
-          <a
-            className="flex items-center gap-3 px-3 py-3 border border-transparent text-vector-white/60 hover:text-vector-blue hover:border-vector-blue/30 transition-all group"
-            href="#"
+          </NavLink>
+          <NavLink
+            to="/templates"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
+                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
+                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
+              }`
+            }
           >
             <span className="material-symbols-outlined text-[18px]">
               inventory_2
@@ -82,10 +111,15 @@ const Sidebar: React.FC = () => {
             <span className="text-[9px] tracking-widest uppercase">
               Templates
             </span>
-          </a>
-          <a
-            className="flex items-center gap-3 px-3 py-3 border border-transparent text-vector-white/60 hover:text-vector-blue hover:border-vector-blue/30 transition-all group"
-            href="#"
+          </NavLink>
+          <NavLink
+            to="/calendar"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
+                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
+                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
+              }`
+            }
           >
             <span className="material-symbols-outlined text-[18px]">
               calendar_month
@@ -93,7 +127,7 @@ const Sidebar: React.FC = () => {
             <span className="text-[9px] tracking-widest uppercase">
               Calendar & Schedule
             </span>
-          </a>
+          </NavLink>
         </nav>
       </div>
 

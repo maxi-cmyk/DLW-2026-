@@ -1,12 +1,6 @@
 import React from "react";
 
-export interface BacklogItemData {
-  category: string;
-  title: string;
-  duration: string;
-}
-
-const BacklogItem: React.FC<{ item: BacklogItemData }> = ({ item }) => {
+const BacklogItem = ({ item }) => {
   return (
     <div className="group border border-white/10 p-4 hover:border-vector-blue transition-all duration-300 cursor-pointer bg-black/40 hover:bg-vector-blue/5 relative overflow-hidden">
       <div className="absolute top-0 right-0 p-1">
@@ -40,8 +34,8 @@ const BacklogItem: React.FC<{ item: BacklogItemData }> = ({ item }) => {
   );
 };
 
-const Backlog: React.FC = () => {
-  const items: BacklogItemData[] = [
+const Backlog = () => {
+  const items = [
     { category: "RESEARCH", title: "Competitor Pricing", duration: "45m" },
     { category: "DEV", title: "OAuth Implementation", duration: "2h" },
     { category: "DESIGN", title: "Component Library", duration: "15m" },

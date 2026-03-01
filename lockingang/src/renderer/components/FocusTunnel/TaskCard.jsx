@@ -1,22 +1,6 @@
 import React from "react";
 
-export interface TaskData {
-  id: string;
-  title: string;
-  description: string;
-  status: "ACTIVE" | "EXECUTING" | "OPEN";
-  duration?: string;
-  timeRemaining?: string;
-  details?: string;
-  transform: string;
-  zIndex: number;
-}
-
-interface TaskCardProps {
-  task: TaskData;
-}
-
-const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
+const TaskCard = ({ task }) => {
   if (task.status === "OPEN") {
     return (
       <div
