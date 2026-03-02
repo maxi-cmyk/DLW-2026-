@@ -8,6 +8,17 @@ const MIN_SCALE = 0.2;
 const MAX_SCALE = 3;
 const ZOOM_SENSITIVITY = 0.001;
 
+const getNodeColors = (status, isSelected) => {
+  if (isSelected) return { border: "#7DF9FF", icon: "#7DF9FF", glow: "0 0 24px rgba(125,249,255,0.7)", label: "#7DF9FF" };
+  switch (status) {
+    case "completed": return { border: "#7DF9FF", icon: "#7DF9FF", glow: "0 0 8px rgba(125,249,255,0.3)", label: "rgba(125,249,255,0.85)" };
+    case "active":    return { border: "#FFB800", icon: "#FFB800", glow: "0 0 8px rgba(255,184,0,0.25)", label: "rgba(255,184,0,0.9)" };
+    case "critical":  return { border: "#FF4444", icon: "#FF4444", glow: "0 0 12px rgba(255,68,68,0.5)", label: "rgba(255,68,68,0.9)" };
+    case "locked":    return { border: "rgba(125,249,255,0.18)", icon: "rgba(125,249,255,0.2)", glow: "none", label: "rgba(125,249,255,0.25)" };
+    default:          return { border: "rgba(125,249,255,0.45)", icon: "rgba(125,249,255,0.55)", glow: "none", label: "rgba(125,249,255,0.6)" };
+  }
+};
+
 const VectorGraphScreen = () => {
   const [showBriefing, setShowBriefing] = useState(false);
   const [nodes, setNodes] = useState(() => getNodes());
@@ -446,17 +457,13 @@ const VectorGraphScreen = () => {
                 const isSelected = selectedNode?.id === node.id;
                 const sizePx = node.isPrimary ? 56 : 40;
                 const borderW = node.isPrimary ? "2px" : "1px";
+                const colors = getNodeColors(node.status, isSelected);
 
                 return (
                   <div
                     key={node.id}
                     className="absolute flex flex-col items-center"
-                    style={{
-                      left: pos.x,
-                      top: pos.y,
-                      transform: "translate(-50%, -50%)",
-                      cursor: "grab",
-                    }}
+                    style={{ left: pos.x, top: pos.y, transform: "translate(-50%, -50%)", cursor: "grab" }}
                     onPointerDown={(e) => handleNodePointerDown(e, node)}
                   >
                     <div className="relative">
@@ -466,35 +473,31 @@ const VectorGraphScreen = () => {
                           height: sizePx,
                           borderWidth: borderW,
                           borderStyle: "solid",
-                          borderColor: isSelected ? "#7DF9FF" : "rgba(125,249,255,0.5)",
-                          boxShadow: isSelected
-                            ? "0 0 24px rgba(125,249,255,0.7)"
-                            : "none",
+                          borderColor: colors.border,
+                          boxShadow: colors.glow,
                         }}
                         className="flex items-center justify-center bg-vector-bg transition-all duration-150"
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{
-                            fontSize: node.isPrimary ? "1.5rem" : "1.25rem",
-                            color: isSelected ? "#7DF9FF" : "rgba(125,249,255,0.6)",
-                          }}
+                          style={{ fontSize: node.isPrimary ? "1.5rem" : "1.25rem", color: colors.icon }}
                         >
                           {node.icon}
                         </span>
                       </div>
                       {isSelected && (
-                        <div
-                          className="absolute inset-0 border border-vector-blue animate-ping opacity-40 pointer-events-none"
-                        />
+                        <div className="absolute inset-0 border border-vector-blue animate-ping opacity-40 pointer-events-none" />
+                      )}
+                      {node.status === "critical" && !isSelected && (
+                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 animate-pulse" />
                       )}
                     </div>
                     <div
                       style={{
                         marginTop: 8,
                         padding: "2px 8px",
-                        border: `1px solid ${isSelected ? "#7DF9FF" : "rgba(125,249,255,0.3)"}`,
-                        color: isSelected ? "#7DF9FF" : "rgba(125,249,255,0.5)",
+                        border: `1px solid ${colors.border}`,
+                        color: colors.label,
                         fontSize: "8px",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
@@ -504,6 +507,9 @@ const VectorGraphScreen = () => {
                       }}
                     >
                       {node.label}
+                      {node.mastery !== null && node.mastery !== undefined && (
+                        <span style={{ marginLeft: 6, opacity: 0.6 }}>{Math.round(node.mastery * 100)}%</span>
+                      )}
                     </div>
                   </div>
                 );

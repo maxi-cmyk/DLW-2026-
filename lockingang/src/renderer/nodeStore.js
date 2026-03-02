@@ -26,6 +26,7 @@ function adaptBackendData({ nodes: rawNodes, edges: rawEdges }) {
         y: n.position?.y ?? 50,
         isPrimary: n.type === "primary",
         status: n.status || "active",
+        mastery: n.mastery ?? null,
         data: n.payload?.description || "",
         connectedTo: outboundEdges[n.id] || [],
     }));

@@ -1,140 +1,171 @@
 {
     "nodes": [
         {
-            "id": "SYSTEM_CORE",
-            "label": "SYSTEM_CORE",
+            "id": "CS105_STATS",
+            "label": "CS105 STATS",
             "type": "primary",
-            "icon": "blur_on",
+            "icon": "functions",
             "status": "completed",
-            "position": {
-                "x": 50,
-                "y": 50
-            },
+            "mastery": 0.85,
+            "position": { "x": 50, "y": 50 },
             "payload": {
-                "description": "PRIMARY SYSTEM CORE.\nSTATUS: ONLINE.\nACCESS_LEVEL: OMEGA.",
-                "tasks": [
-                    {
-                        "id": "t_core_1",
-                        "title": "Initialise Boot Sequence",
-                        "status": "completed"
-                    }
-                ],
-                "associatedQuizId": "quiz_system_core"
+                "description": "CS105 STATISTICS — Root node.\nMastery: 0.85 | Status: STRONG\nAll subtopics tracked and indexed.\nLast reviewed: today.",
+                "tasks": [{ "id": "t_root", "title": "Complete CS105", "status": "pending" }],
+                "associatedQuizId": "quiz_cs105"
             }
         },
         {
-            "id": "BIOLOGY_ARCHIVE",
-            "label": "BIOLOGY_ARCHIVE",
+            "id": "PROBABILITY",
+            "label": "PROBABILITY",
             "type": "secondary",
-            "icon": "biotech",
-            "status": "active",
-            "position": {
-                "x": 80,
-                "y": 30
-            },
+            "icon": "casino",
+            "status": "completed",
+            "mastery": 0.92,
+            "position": { "x": 26, "y": 24 },
             "payload": {
-                "description": "BIOLOGICAL ARCHIVES.\nSTATUS: ENCRYPTED.\nREQUIRED_CLEARANCE: DELTA.",
-                "tasks": [
-                    {
-                        "id": "t_bio_1",
-                        "title": "Decrypt Archive",
-                        "status": "pending"
-                    }
-                ],
-                "associatedQuizId": "quiz_biology_archive"
+                "description": "Probability fundamentals.\nMastery: 0.92 | Status: MASTERED\nAxioms, sample spaces, events.\nLast reviewed: 3 days ago.",
+                "tasks": [{ "id": "t_prob_1", "title": "Review axioms", "status": "completed" }],
+                "associatedQuizId": "quiz_probability"
             }
         },
         {
-            "id": "QUANTUM_PHYS",
-            "label": "QUANTUM_PHYS",
+            "id": "COND_PROB",
+            "label": "COND PROB",
+            "type": "secondary",
+            "icon": "device_hub",
+            "status": "completed",
+            "mastery": 0.88,
+            "position": { "x": 10, "y": 11 },
+            "payload": {
+                "description": "Conditional Probability.\nMastery: 0.88 | Status: STRONG\nP(A|B) and independence solid.",
+                "tasks": [],
+                "associatedQuizId": "quiz_cond_prob"
+            }
+        },
+        {
+            "id": "BAYES_THEOREM",
+            "label": "BAYES THM",
+            "type": "secondary",
+            "icon": "swap_horiz",
+            "status": "active",
+            "mastery": 0.61,
+            "position": { "x": 6, "y": 42 },
+            "payload": {
+                "description": "Bayes' Theorem.\nMastery: 0.61 | Status: REVIEW SOON\nPosterior probability needs practice.\nDecay predicted in 4 days.",
+                "tasks": [{ "id": "t_bayes_1", "title": "Practice Bayes problems", "status": "pending" }],
+                "associatedQuizId": "quiz_bayes"
+            }
+        },
+        {
+            "id": "EXP_VARIANCE",
+            "label": "EXP & VAR",
+            "type": "secondary",
+            "icon": "show_chart",
+            "status": "completed",
+            "mastery": 0.82,
+            "position": { "x": 80, "y": 22 },
+            "payload": {
+                "description": "Expectation & Variance.\nMastery: 0.82 | Status: STRONG\nE[X], Var(X), covariance solid.\nLast reviewed: 2 days ago.",
+                "tasks": [],
+                "associatedQuizId": "quiz_exp_var"
+            }
+        },
+        {
+            "id": "COMMON_DIST",
+            "label": "COMMON DIST",
+            "type": "secondary",
+            "icon": "bar_chart",
+            "status": "critical",
+            "mastery": 0.20,
+            "position": { "x": 90, "y": 52 },
+            "payload": {
+                "description": "Common Distributions — CRITICAL.\nMastery: 0.20 | WALL DETECTED\nFailing repeatedly. Quiz score: 0.20\nBridge node generated automatically.\nReview scheduled: TONIGHT 11pm.",
+                "tasks": [{ "id": "t_dist_1", "title": "Review all distributions", "status": "pending" }],
+                "associatedQuizId": "quiz_common_dist"
+            }
+        },
+        {
+            "id": "NORMAL_DIST",
+            "label": "NORMAL DIST",
+            "type": "secondary",
+            "icon": "area_chart",
+            "status": "critical",
+            "mastery": 0.15,
+            "position": { "x": 96, "y": 32 },
+            "payload": {
+                "description": "Normal Distribution — CRITICAL.\nMastery: 0.15 | URGENT\nZ-scores and PDF poorly understood.\nReview in 5 hours or score decays to 0.",
+                "tasks": [],
+                "associatedQuizId": "quiz_normal_dist"
+            }
+        },
+        {
+            "id": "BINOMIAL_DIST",
+            "label": "BINOMIAL",
+            "type": "secondary",
+            "icon": "scatter_plot",
+            "status": "active",
+            "mastery": 0.45,
+            "position": { "x": 96, "y": 72 },
+            "payload": {
+                "description": "Binomial Distribution.\nMastery: 0.45 | REVIEW NEEDED\nFormula understood, applications weak.\nDecay in 3 days.",
+                "tasks": [],
+                "associatedQuizId": "quiz_binomial"
+            }
+        },
+        {
+            "id": "HYPOTHESIS_TEST",
+            "label": "HYPO TEST",
             "type": "secondary",
             "icon": "science",
             "status": "active",
-            "position": {
-                "x": 80,
-                "y": 70
-            },
+            "mastery": 0.52,
+            "position": { "x": 68, "y": 83 },
             "payload": {
-                "description": "QUANTUM PHYSICS MODULE.\nSTATUS: STANDBY.\nRESOURCES: ADEQUATE.",
-                "tasks": [
-                    {
-                        "id": "t_phys_1",
-                        "title": "Run Simulation",
-                        "status": "pending"
-                    }
-                ],
-                "associatedQuizId": "quiz_quantum_phys"
+                "description": "Hypothesis Testing.\nMastery: 0.52 | IN PROGRESS\np-values partially understood.\nDecay predicted in 5 days.",
+                "tasks": [{ "id": "t_hypo_1", "title": "Practice null hypothesis problems", "status": "pending" }],
+                "associatedQuizId": "quiz_hypo_test"
             }
         },
         {
-            "id": "OLD_EARTH",
-            "label": "OLD_EARTH",
+            "id": "CENTRAL_LIMIT",
+            "label": "CENTRAL LIMIT",
             "type": "secondary",
-            "icon": "history_edu",
+            "icon": "trending_up",
+            "status": "active",
+            "mastery": 0.48,
+            "position": { "x": 44, "y": 89 },
+            "payload": {
+                "description": "Central Limit Theorem.\nMastery: 0.48 | IN PROGRESS\nSampling distributions concept unclear.\nDecay in 4 days.",
+                "tasks": [],
+                "associatedQuizId": "quiz_clt"
+            }
+        },
+        {
+            "id": "BAYESIAN_INF",
+            "label": "BAYESIAN INF",
+            "type": "secondary",
+            "icon": "psychology",
             "status": "locked",
-            "position": {
-                "x": 20,
-                "y": 30
-            },
+            "mastery": 0.08,
+            "position": { "x": 20, "y": 76 },
             "payload": {
-                "description": "OLD EARTH RECORDS.\nSTATUS: CORRUPTED.\nRESTORATION_IN_PROGRESS: 12%.",
-                "tasks": [
-                    {
-                        "id": "t_hist_1",
-                        "title": "Restore Records",
-                        "status": "pending"
-                    }
-                ],
-                "associatedQuizId": "quiz_old_earth"
-            }
-        },
-        {
-            "id": "COMPOUND_ENG",
-            "label": "COMPOUND_ENG",
-            "type": "secondary",
-            "icon": "science",
-            "status": "active",
-            "position": {
-                "x": 20,
-                "y": 70
-            },
-            "payload": {
-                "description": "CHEMICAL COMPOUND ENGINE.\nSTATUS: ACTIVE.\nWARNING: FLAMMABLE MATERIALS PRESENT.",
-                "tasks": [
-                    {
-                        "id": "t_chem_1",
-                        "title": "Safety Audit",
-                        "status": "pending"
-                    }
-                ],
-                "associatedQuizId": "quiz_compound_eng"
+                "description": "Bayesian Inference — LOCKED.\nMastery: 0.08 | Prerequisites not met.\nRequires: Bayes' Theorem ≥0.7, Hypothesis Testing ≥0.7.",
+                "tasks": [],
+                "associatedQuizId": "quiz_bayesian_inf"
             }
         }
     ],
     "edges": [
-        {
-            "from": "SYSTEM_CORE",
-            "to": "BIOLOGY_ARCHIVE",
-            "type": "requires",
-            "status": "connected"
-        },
-        {
-            "from": "SYSTEM_CORE",
-            "to": "QUANTUM_PHYS",
-            "type": "requires",
-            "status": "connected"
-        },
-        {
-            "from": "BIOLOGY_ARCHIVE",
-            "to": "OLD_EARTH",
-            "type": "is_a_type_of",
-            "status": "connected"
-        },
-        {
-            "from": "QUANTUM_PHYS",
-            "to": "COMPOUND_ENG",
-            "type": "related_to",
-            "status": "connected"
-        }
+        { "from": "CS105_STATS", "to": "PROBABILITY", "type": "requires", "status": "connected" },
+        { "from": "CS105_STATS", "to": "EXP_VARIANCE", "type": "requires", "status": "connected" },
+        { "from": "CS105_STATS", "to": "HYPOTHESIS_TEST", "type": "requires", "status": "connected" },
+        { "from": "CS105_STATS", "to": "CENTRAL_LIMIT", "type": "requires", "status": "connected" },
+        { "from": "PROBABILITY", "to": "COND_PROB", "type": "requires", "status": "connected" },
+        { "from": "COND_PROB", "to": "BAYES_THEOREM", "type": "requires", "status": "connected" },
+        { "from": "EXP_VARIANCE", "to": "COMMON_DIST", "type": "requires", "status": "connected" },
+        { "from": "COMMON_DIST", "to": "NORMAL_DIST", "type": "is_a_type_of", "status": "connected" },
+        { "from": "COMMON_DIST", "to": "BINOMIAL_DIST", "type": "is_a_type_of", "status": "connected" },
+        { "from": "BAYES_THEOREM", "to": "BAYESIAN_INF", "type": "requires", "status": "connected" },
+        { "from": "HYPOTHESIS_TEST", "to": "BAYESIAN_INF", "type": "requires", "status": "connected" }
     ]
 }
