@@ -116,7 +116,7 @@ const ChatbotScreen = () => {
             </div>
             <div className="flex items-center gap-4">
               <div className="px-3 py-1 border border-vector-blue/30 bg-vector-bg text-[8px] text-vector-blue tracking-widest">
-                SYSTEM_ONLINE
+                <p>SYSTEM_ONLINE</p>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="h-2 w-2 bg-green-500 animate-pulse" />

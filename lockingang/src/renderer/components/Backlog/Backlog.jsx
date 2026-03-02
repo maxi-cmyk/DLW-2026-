@@ -69,7 +69,7 @@ const Backlog = () => {
       <div className="p-4 border-t border-vector-blue/20">
         <button className="w-full border border-dashed border-vector-blue/40 py-2 text-[9px] text-vector-blue/60 hover:text-vector-blue hover:border-vector-blue hover:bg-vector-blue/10 transition-all uppercase tracking-widest flex items-center justify-center gap-2">
           <span className="material-symbols-outlined text-[12px]">add</span>
-          Quick_Entry
+          <p>Quick_Entry</p>
         </button>
       </div>
     </div>

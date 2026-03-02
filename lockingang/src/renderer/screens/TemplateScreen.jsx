@@ -202,7 +202,7 @@ const TemplateScreen = () => {
                                 className="px-4 py-2 border border-vector-blue text-vector-blue text-[8px] font-mono tracking-widest uppercase hover:bg-vector-blue/20 transition-all flex items-center gap-2"
                             >
                                 <span className="material-symbols-outlined text-sm">auto_awesome</span>
-                                LOAD FILES
+                                <p>LOAD FILES</p>
                             </button>
                         </div>
                     )}
@@ -242,7 +242,7 @@ const TemplateScreen = () => {
                                             </span>
                                             {doneCount > 0 && (
                                                 <button onClick={clearDone} className="text-[8px] text-vector-white/30 hover:text-vector-blue font-mono uppercase tracking-widest transition-colors">
-                                                    CLEAR DONE
+                                                    <p>CLEAR DONE</p>
                                                 </button>
                                             )}
                                         </div>
@@ -279,7 +279,7 @@ const TemplateScreen = () => {
                                                 <span className="material-symbols-outlined text-sm">
                                                     {demoPhase === "loading" ? "hourglass_top" : "auto_awesome"}
                                                 </span>
-                                                {demoPhase === "loading" ? "ANALYSING..." : `BUILD KNOWLEDGE TREE (${pendingCount} FILE${pendingCount !== 1 ? "S" : ""})`}
+                                                <p>{demoPhase === "loading" ? "ANALYSING..." : `BUILD KNOWLEDGE TREE (${pendingCount} FILE${pendingCount !== 1 ? "S" : ""})`}</p>
                                             </button>
                                         </div>
                                     </div>
@@ -425,13 +425,13 @@ const TemplateScreen = () => {
                                     className="flex-1 py-4 bg-vector-blue text-vector-bg text-[10px] font-bold tracking-widest uppercase font-mono hover:brightness-110 transition-all flex items-center justify-center gap-2"
                                 >
                                     <span className="material-symbols-outlined">account_tree</span>
-                                    VIEW KNOWLEDGE TREE
+                                    <p>VIEW KNOWLEDGE TREE</p>
                                 </button>
                                 <button
                                     onClick={() => { setDemoPhase("idle"); setUploadedFiles([]); setScanLog([]); setDiscoveredNodes([]); }}
                                     className="px-6 py-4 border border-vector-blue/30 text-vector-blue text-[9px] font-mono tracking-widest uppercase hover:bg-vector-blue/10 transition-all"
                                 >
-                                    RESET
+                                    <p>RESET</p>
                                 </button>
                             </div>
                         </div>

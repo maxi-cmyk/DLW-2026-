@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  p {
+    font-size: 1rem;
+  }
+
   body {
     @apply bg-vector-bg text-vector-white font-terminal;
     background-image:
@@ -12,46 +16,50 @@
   }
 }
 
-.vector-border {
-  border: 1px solid #7df9ff;
-  box-shadow: 0 0 5px rgba(125, 249, 255, 0.3);
-}
+@layer components {
+  .vector-border {
+    border: 1px solid #7df9ff;
+    box-shadow: 0 0 5px rgba(125, 249, 255, 0.3);
+  }
 
-.vector-glow {
-  box-shadow:
-    0 0 15px rgba(125, 249, 255, 0.4),
-    inset 0 0 10px rgba(125, 249, 255, 0.2);
-  border: 2px solid #7df9ff;
-}
+  .vector-glow {
+    box-shadow:
+      0 0 15px rgba(125, 249, 255, 0.4),
+      inset 0 0 10px rgba(125, 249, 255, 0.2);
+    border: 2px solid #7df9ff;
+  }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #0d0221;
-}
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #0d0221;
+  }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #7df9ff;
-}
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #7df9ff;
+  }
 
-.terminal-text {
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-}
+  .terminal-text {
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  }
 
-.scanline {
-  width: 100%;
-  height: 100%;
-  z-index: 50;
-  background: linear-gradient(0deg,
+  .scanline {
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+    background: linear-gradient(
+      0deg,
       rgba(0, 0, 0, 0) 50%,
-      rgba(255, 255, 255, 0.02) 50%);
-  background-size: 100% 4px;
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  left: 0;
+      rgba(255, 255, 255, 0.02) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
 }
 
 /* Infinite conveyor belt marquee */

@@ -1,112 +1,81 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
+import styles from "./Sidebar.module.css";
 
 const Sidebar = () => {
+  const location = useLocation();
   return (
-    <aside className="w-64 flex-shrink-0 border-r border-vector-blue flex flex-col justify-between h-full bg-vector-bg/80 backdrop-blur-sm z-20">
+    <aside className={styles.sidebar}>
       <div>
-        <div className="p-6 border-b border-vector-blue">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 shrink-0 aspect-square border border-vector-blue p-1">
+        <div className={styles.headerBox}>
+          <div className={styles.headerFlex}>
+            <div className={styles.profileFlex}>
+              <div className={styles.profilePicBorder}>
                 <div
-                  className="w-full aspect-square bg-cover bg-center"
+                  className={styles.profilePic}
                   style={{
                     backgroundImage:
                       "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCK4_TDWy0cSfYLlMGqh0G0ymA1sS4sdbcmibPn-99G80KZd5aA0NQnNnzXt2AMwCBUe0TIO_f1WwVlqYL1pyU1v3twe3FCrrDpt6mY4QQBvs1HlKfyQjvRrDQ9KNFctln1kG1NsBNTJJupSqwWLbXbelTehaq_Ii5qCKeDKf__KdhmEAELoeuL3QOKwfMONyGl8HH_Uk6-ULycqolDmiyO6glhUa0ZWF0biFKMmUlEXSaRPP0-XPuwh7Xkm5b2AayPNr5eLJnZFUQ')",
-                    imageRendering: "pixelated",
                   }}
-                ></div>
+                />
               </div>
-              <div className="flex flex-col gap-1 min-w-0 overflow-hidden">
-                <h1 className="text-[10px] leading-tight terminal-text uppercase tracking-tighter text-vector-blue truncate">
-                  LOCK_IN_GANG_OS
-                </h1>
-                <p className="text-[8px] text-vector-white/70 uppercase truncate">
-                  Student_ID: #8842
-                </p>
+              <div className={styles.profileTextFlex}>
+                <h1 className={styles.appTitle}>LOCK_IN_GANG_OS</h1>
+                <p className={styles.studentId}>Student_ID: #8842</p>
               </div>
             </div>
           </div>
         </div>
 
-        <nav className="flex flex-col gap-1 p-3 mt-2">
+        <nav className={styles.navGroup}>
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
-                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
-                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
-              }`
+              `${styles.navLink} group ${isActive ? styles.navLinkActive : styles.navLinkInactive}`
             }
           >
             <span
-              className={`material-symbols-outlined text-[18px] ${location.pathname === "/" ? "text-[#7DF9FF]" : ""
-                }`}
+              className={`${styles.navIcon} ${location.pathname === "/" ? styles.navIconActive : ""}`}
             >
               dashboard
             </span>
-            <span className="text-[9px] tracking-widest uppercase">
-              Dashboard
-            </span>
+            <span className={styles.navLabel}>Dashboard</span>
           </NavLink>
           <NavLink
             to="/knowledge-tree"
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
-                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
-                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
-              }`
+              `${styles.navLink} group ${isActive ? styles.navLinkActive : styles.navLinkInactive}`
             }
           >
-            <span className="material-symbols-outlined text-[18px]">
-              account_tree
-            </span>
-            <span className="text-[9px] tracking-widest uppercase">
-              Knowledge Tree
-            </span>
+            <span className={styles.navIcon}>account_tree</span>
+            <span className={styles.navLabel}>Knowledge Tree</span>
           </NavLink>
           <NavLink
             to="/chatbot"
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
-                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
-                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
-              }`
+              `${styles.navLink} group ${isActive ? styles.navLinkActive : styles.navLinkInactive}`
             }
           >
-            <span className="material-symbols-outlined text-[18px]">chat</span>
-            <span className="text-[9px] tracking-widest uppercase">
-              Chatbot
-            </span>
+            <span className={styles.navIcon}>chat</span>
+            <span className={styles.navLabel}>Chatbot</span>
           </NavLink>
           <NavLink
             to="/templates"
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
-                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
-                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
-              }`
+              `${styles.navLink} group ${isActive ? styles.navLinkActive : styles.navLinkInactive}`
             }
           >
-            <span className="material-symbols-outlined text-[18px]">upload_file</span>
-            <span className="text-[9px] tracking-widest uppercase">Templates</span>
+            <span className={styles.navIcon}>upload_file</span>
+            <span className={styles.navLabel}>Templates</span>
           </NavLink>
           <NavLink
             to="/calendar"
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 border transition-all group ${isActive
-                ? "border-[#7DF9FF] bg-[#7DF9FF]/10 text-white"
-                : "border-transparent text-white/60 hover:text-[#7DF9FF] hover:border-[#7DF9FF]/30"
-              }`
+              `${styles.navLink} group ${isActive ? styles.navLinkActive : styles.navLinkInactive}`
             }
           >
-            <span className="material-symbols-outlined text-[18px]">
-              calendar_month
-            </span>
-            <span className="text-[9px] tracking-widest uppercase">
-              Calendar & Schedule
-            </span>
+            <span className={styles.navIcon}>calendar_month</span>
+            <span className={styles.navLabel}>Calendar & Schedule</span>
           </NavLink>
         </nav>
       </div>

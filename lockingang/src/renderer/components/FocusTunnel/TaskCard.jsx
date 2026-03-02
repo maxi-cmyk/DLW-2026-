@@ -1,18 +1,17 @@
 import React from "react";
+import styles from "./TaskCard.module.css";
 
 const TaskCard = ({ task, onStart }) => {
   if (task.status === "OPEN") {
     return (
-      <div
-        className="fan-card w-[280px] h-[400px] bg-transparent border-2 border-dashed border-vector-blue/30 flex flex-col items-center justify-center p-5 cursor-pointer group hover:bg-vector-blue/5 hover:border-vector-blue/60 transition-colors"
-      >
-        <span className="material-symbols-outlined text-vector-blue/30 group-hover:text-vector-blue text-[32px] group-hover:scale-110 transition-transform mb-3">
+      <div className={`${styles.cardOpen} fan-card group`}>
+        <span className={`${styles.iconAdd} group-hover:scale-110 mb-3`}>
           add_circle
         </span>
-        <h3 className="text-[9px] text-vector-blue/30 group-hover:text-vector-blue uppercase tracking-[0.2em]">
+        <h3 className={styles.titleOpen}>
           Add_Task
         </h3>
-        <p className="text-[7px] text-vector-blue/20 font-mono mt-2 group-hover:text-vector-blue/50">
+        <p className={styles.descOpen}>
           OPEN_SLOT
         </p>
       </div>
@@ -21,37 +20,29 @@ const TaskCard = ({ task, onStart }) => {
 
   if (task.status === "EXECUTING") {
     return (
-      <div
-        className="fan-card w-[280px] h-[380px] bg-[#0D0221] vector-glow flex flex-col p-6 relative overflow-hidden"
-      >
-        <div
-          className="absolute inset-0 opacity-10 pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(#7DF9FF 1px, transparent 1px)",
-            backgroundSize: "15px 15px",
-          }}
-        ></div>
-        <div className="flex justify-between items-start mb-6 relative z-10">
-          <div className="text-lg font-mono text-vector-white terminal-text">
+      <div className={`${styles.cardExecuting} fan-card`}>
+        <div className={styles.executingBg} />
+        <div className={styles.executingHeader}>
+          <p className={styles.executingTime}>
             {task.timeRemaining}
-          </div>
-          <button className="text-vector-white/30 hover:text-vector-white transition-colors">
-            <span className="material-symbols-outlined text-[16px]">close</span>
+          </p>
+          <button className={styles.closeBtn}>
+            <span className={styles.iconCloseSm}>close</span>
           </button>
         </div>
 
-        <div className="relative z-10 flex-1 flex flex-col">
-          <h2 className="text-sm text-vector-white mb-4 uppercase tracking-tighter leading-snug">
+        <div className={styles.executingBody}>
+          <h2 className={styles.executingTitle}>
             {task.title}
           </h2>
-          <p className="text-[11px] text-vector-white/70 font-mono mb-6 leading-loose border-l-2 border-vector-blue/40 pl-3">
+          <p className={styles.executingDesc}>
             {task.description}
           </p>
 
-          <div className="mt-auto">
+          <div className={styles.btnWrapperBot}>
             <button
               onClick={() => onStart?.(task)}
-              className="w-full bg-vector-blue text-vector-bg py-3 text-[9px] transition-all hover:brightness-110 active:scale-95 uppercase tracking-widest font-bold"
+              className={styles.startBtn}
             >
               START
             </button>
@@ -63,34 +54,32 @@ const TaskCard = ({ task, onStart }) => {
 
   // ACTIVE status
   return (
-    <div
-      className="fan-card w-[280px] h-[380px] bg-[#0D0221] border border-vector-blue shadow-card-glow hover:shadow-card-glow-hover flex flex-col p-5 cursor-pointer group"
-    >
-      <div className="flex justify-between items-center mb-4">
-        <span className="text-[8px] text-vector-blue/60 uppercase tracking-widest opacity-70">
+    <div className={`${styles.cardActive} fan-card group`}>
+      <div className={styles.activeHeader}>
+        <span className={styles.activeId}>
           {task.id}
         </span>
-        <button className="text-vector-white/30 hover:text-vector-white transition-colors">
-          <span className="material-symbols-outlined text-[16px]">close</span>
+        <button className={styles.closeBtn}>
+          <span className={styles.iconCloseSm}>close</span>
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center">
-        <h2 className="text-xs text-vector-white uppercase leading-relaxed">
+      <div className={styles.activeContent}>
+        <h2 className={styles.activeTitle}>
           {task.title}
         </h2>
-        <p className="text-[9px] text-vector-white/40 font-mono mt-2 leading-relaxed">
+        <p className={styles.activeDesc}>
           {task.description}
         </p>
       </div>
 
-      <div className="mt-auto flex flex-col gap-2">
-        <span className="text-[8px] text-vector-blue/60 border border-vector-blue/20 px-2 py-1 uppercase tracking-tighter w-fit opacity-70">
+      <div className={styles.activeFooter}>
+        <span className={styles.activeDuration}>
           {task.duration}
         </span>
         <button
           onClick={() => onStart?.(task)}
-          className="w-full bg-vector-blue text-vector-bg py-3 text-[9px] transition-all hover:brightness-110 active:scale-95 uppercase tracking-widest font-bold"
+          className={styles.startBtn}
         >
           START
         </button>

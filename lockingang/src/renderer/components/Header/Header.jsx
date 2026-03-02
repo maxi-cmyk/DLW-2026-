@@ -14,7 +14,7 @@ const Header = () => {
       </div>
       <div className="flex items-center gap-4">
         <div className="px-3 py-1 border border-vector-blue/30 bg-vector-bg text-[8px] text-vector-blue tracking-widest">
-          SYSTEM_NORMAL
+          <p>SYSTEM_NORMAL</p>
         </div>
         <div className="text-vector-blue cursor-pointer hover:text-white transition-colors">
           <span className="material-symbols-outlined text-[20px]">

@@ -272,10 +272,10 @@ const VectorGraphScreen = () => {
           >
             {/* Fixed HUD — stays in place while graph pans */}
             <div className="absolute top-6 left-8 z-20 space-y-1 text-[9px] tracking-widest uppercase text-vector-blue/60 pointer-events-none">
-              <div className="text-vector-blue/90">NODES: {nodes.length}</div>
-              <div>LINKS: {edges.length}</div>
-              <div>ZOOM: {Math.round(scale * 100)}%</div>
-              <div>
+              <p className="text-vector-blue/90">NODES: {nodes.length}</p>
+              <p>LINKS: {edges.length}</p>
+              <p>ZOOM: {Math.round(scale * 100)}%</p>
+              <p>
                 BACKEND:{" "}
                 <span className={
                   backendStatus === "live" ? "text-green-400" :
@@ -284,7 +284,7 @@ const VectorGraphScreen = () => {
                 }>
                   {backendStatus === "live" ? "LIVE" : backendStatus === "offline" ? "OFFLINE" : "..."}
                 </span>
-              </div>
+              </p>
             </div>
 
             {/* Connection banner */}
@@ -520,15 +520,15 @@ const VectorGraphScreen = () => {
             <div className="absolute bottom-6 left-6 z-20 flex items-center gap-4 pointer-events-auto">
               <button className="border border-vector-blue/50 bg-vector-blue/5 px-6 py-2 flex items-center gap-2 hover:bg-vector-blue/20 transition-all text-vector-white text-[9px] tracking-widest uppercase">
                 <span className="material-symbols-outlined text-[18px]">magic_button</span>
-                AUTO_SORT
+                <p>AUTO_SORT</p>
               </button>
               <button className="border border-vector-blue bg-vector-blue/10 px-6 py-2 flex items-center gap-2 hover:bg-vector-blue/30 transition-all text-vector-white text-[9px] tracking-widest uppercase">
                 <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                ADD_EDGE
+                <p>ADD_EDGE</p>
               </button>
               <button className="border border-red-500/50 bg-red-500/5 px-6 py-2 flex items-center gap-2 text-red-400 hover:bg-red-500/20 transition-all text-[9px] tracking-widest uppercase">
                 <span className="material-symbols-outlined text-[18px]">delete</span>
-                DEL_EDGE
+                <p>DEL_EDGE</p>
               </button>
             </div>
 
