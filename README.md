@@ -1,3 +1,7 @@
+# Video Demo 
+
+https://youtube.com/shorts/wftzCy07OX4?si=5-nqOXIZPLgadvlk
+
 # lockingang: AI Learning State Engine 🧠
 
 lockingang is a local-first desktop application that solves the problem of passive, inefficient study for students and self-learners. Its core—the **Learning State Engine**—continuously models what a student knows, how fast they are forgetting it, and what single action they should take next to maximize long-term retention.
