@@ -87,7 +87,9 @@ pip install -r requirements.txt
 copy .env.example .env        # then open .env and fill in your keys
 ```
 
-Make a .env file in the lockingang folder with these three variables:
+Make a .env file in the lockingang folder with these three variables
+For this step you need an Open AI API key and you have to set up a Pinecone Vector db and copy the api key and the index name.
+
 `.env` values you need:
 ```
 OPENAI_API_KEY=sk-...
